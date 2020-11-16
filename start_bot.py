@@ -1,5 +1,7 @@
 import time
 
+from urllib3.contrib.socks import SOCKSHTTPConnectionPool
+
 from bot_sources import bot, logger
 from models import initialize_db, Movement
 
@@ -10,5 +12,5 @@ if __name__ == "__main__":
         try:
             bot.polling(none_stop=False, interval=0, timeout=20)
         except Exception as e:
-            logger.info(e)
+            logger.error(e)
             time.sleep(15)
