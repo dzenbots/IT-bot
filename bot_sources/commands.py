@@ -4,15 +4,15 @@ from GoogleSheetsAPI import GoogleSync
 from models import User, Group, Links, Equipment, Movement
 from settings import CHANNEL_ID
 from . import bot, logger, user_info, get_unauthorized_user_start_message, get_new_unauthorized_user_message, \
-    get_admin_help_message, keyboard_to_chose_users_groups, groups_keyboard, get_start_keyboard
+    get_admin_help_message, keyboard_to_chose_users_groups, groups_keyboard, get_start_keyboard, is_person
 
 
 @bot.message_handler(commands=['start'])
 def get_start(message: Message):
+    if not is_person(message.chat):
+        return
     try:
         user = User.get(telegram_id=str(message.chat.id))
-        if user.telegram_id == CHANNEL_ID:
-            return
         if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Unauthorized'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -37,11 +37,11 @@ def get_start(message: Message):
 
 @bot.message_handler(commands=['help'])
 def get_help(message: Message):
+    if not is_person(message.chat):
+        return
     logger.info('ask for help!')
     try:
         user = User.get(telegram_id=str(message.chat.id))
-        if user.telegram_id == CHANNEL_ID:
-            return
         if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Unauthorized'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -58,10 +58,10 @@ def get_help(message: Message):
 
 @bot.message_handler(commands=['groups'])
 def groups_functions(message: Message):
+    if not is_person(message.chat):
+        return
     try:
         user = User.get(telegram_id=message.chat.id)
-        if user.telegram_id == CHANNEL_ID:
-            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -72,10 +72,10 @@ def groups_functions(message: Message):
 
 @bot.message_handler(commands=['all_users_info'])
 def show_all_users(message: Message):
+    if not is_person(message.chat):
+        return
     try:
         user = User.get(telegram_id=message.chat.id)
-        if user.telegram_id == CHANNEL_ID:
-            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -89,10 +89,10 @@ def show_all_users(message: Message):
 
 @bot.message_handler(commands=['google_update'])
 def google_update(message: Message):
+    if not is_person(message.chat):
+        return
     try:
         user = User.get(telegram_id=message.chat.id)
-        if user.telegram_id == CHANNEL_ID:
-            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:

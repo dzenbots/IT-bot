@@ -12,6 +12,12 @@ apihelper.proxy = BOT_PROXY
 bot = TeleBot(token=BOT_TOKEN, num_threads=4)
 
 
+def is_person(chat):
+    if chat.type == 'private':
+        return True
+    return False
+
+
 def get_unauthorized_user_start_message():
     return f"""Вы не авторизованный пользователь!
 Дождитесь пока администратор разрешит Вам использование данного бота!"""

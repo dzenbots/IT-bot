@@ -3,15 +3,15 @@ from telebot.types import Message
 from models import User, Group, Links, Equipment, Movement
 from settings import CHANNEL_ID
 from . import bot, logger, get_unauthorized_user_start_message, get_main_inline_keyboard, equipment_info, \
-    get_equipment_reply_markup, send_equipment_info_to_google_sheet, send_movement_to_google_sheet
+    get_equipment_reply_markup, send_equipment_info_to_google_sheet, send_movement_to_google_sheet, is_person
 
 
 @bot.message_handler(func=lambda message: message.text == 'На главную')
 def go_main(message: Message):
+    if not is_person(message.chat):
+        return
     try:
         user = User.get(telegram_id=message.chat.id)
-        if user.telegram_id == CHANNEL_ID:
-            return
         if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Unauthorized'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -23,10 +23,10 @@ def go_main(message: Message):
 
 @bot.message_handler(func=lambda message: message.text == 'Пост в канал')
 def channel_post(message: Message):
+    if not is_person(message.chat):
+        return
     try:
         user = User.get(telegram_id=message.chat.id)
-        if user.telegram_id == CHANNEL_ID:
-            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -38,10 +38,10 @@ def channel_post(message: Message):
 
 @bot.message_handler(content_types=['text'])
 def plain_text(message: Message):
+    if not is_person(message.chat):
+        return
     try:
         user = User.get(telegram_id=message.chat.id)
-        if user.telegram_id == CHANNEL_ID:
-            return
         if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Unauthorized'):
             raise Exception("Unauthorized user")
     except Exception:
