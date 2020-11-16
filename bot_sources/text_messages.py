@@ -1,8 +1,7 @@
 from telebot.types import Message
 
-from GoogleSheetsAPI import GoogleSync
 from models import User, Group, Links, Equipment, Movement
-from settings import CHANNEL_URL
+from settings import CHANNEL_ID
 from . import bot, logger, get_unauthorized_user_start_message, get_main_inline_keyboard, equipment_info, \
     get_equipment_reply_markup, send_equipment_info_to_google_sheet, send_movement_to_google_sheet
 
@@ -11,6 +10,8 @@ from . import bot, logger, get_unauthorized_user_start_message, get_main_inline_
 def go_main(message: Message):
     try:
         user = User.get(telegram_id=message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Unauthorized'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -24,6 +25,8 @@ def go_main(message: Message):
 def channel_post(message: Message):
     try:
         user = User.get(telegram_id=message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -37,6 +40,8 @@ def channel_post(message: Message):
 def plain_text(message: Message):
     try:
         user = User.get(telegram_id=message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Unauthorized'):
             raise Exception("Unauthorized user")
     except Exception:

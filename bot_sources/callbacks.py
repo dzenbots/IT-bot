@@ -1,5 +1,6 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+from settings import CHANNEL_ID
 from . import bot, logger, get_unauthorized_user_start_message, get_rm_group_keyboard, \
     keyboard_to_chose_users_groups, user_info, get_main_inline_keyboard, get_start_keyboard, main_movement_keyboard, \
     get_edit_equipment_keyboard, get_kurpus_keyboard_for_create_movement
@@ -10,6 +11,8 @@ from models import User, Links, Group, Equipment
 def show_group_list(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -26,6 +29,8 @@ def show_group_list(call):
 def add_group(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -41,6 +46,8 @@ def add_group(call):
 def show_groups_for_remove(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -57,6 +64,8 @@ def show_groups_for_remove(call):
 def remove_group(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -81,6 +90,8 @@ def remove_group(call):
 def add_user_to_group(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -106,6 +117,8 @@ def add_user_to_group(call):
 def group(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -138,6 +151,8 @@ def group(call):
 def rm_user_from_group(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -163,6 +178,8 @@ def rm_user_from_group(call):
 def group(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -196,6 +213,8 @@ def group(call):
 def check_equipment_zavhoz(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Zavhoz'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -212,6 +231,8 @@ def check_equipment_zavhoz(call):
 def start_movement(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -230,6 +251,8 @@ def start_movement(call):
 def main_invent_search(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -247,6 +270,8 @@ def main_invent_search(call):
 def main_serial_search(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -264,6 +289,8 @@ def main_serial_search(call):
 def start_edit_equipment(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -282,6 +309,8 @@ def start_edit_equipment(call):
 def start_edit_equipment(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -317,6 +346,8 @@ def start_edit_equipment(call):
 def start_moving_equipment(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
             raise Exception("Unauthorized user")
     except Exception:
@@ -334,6 +365,8 @@ def start_moving_equipment(call):
 def start_moving_equipment(call):
     try:
         user = User.get(telegram_id=call.message.chat.id)
+        if user.telegram_id == CHANNEL_ID:
+            return
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
             raise Exception("Unauthorized user")
     except Exception:

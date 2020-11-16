@@ -2,7 +2,7 @@ import googleapiclient.discovery
 import httplib2
 from oauth2client.service_account import ServiceAccountCredentials
 
-from settings import SPREADSHEET_ID, CREDENTIAL_FILE
+from settings import INVENTARIZATION_SPREADSHEET_ID, CREDENTIAL_FILE
 from bot_sources import logger
 
 class GoogleSheetOperator(object):
@@ -48,5 +48,5 @@ class GoogleSheetOperator(object):
 
 class GoogleSync(GoogleSheetOperator):
 
-    def __init__(self, spreadsheet_id=SPREADSHEET_ID, credentials_file_name=CREDENTIAL_FILE):
+    def __init__(self, spreadsheet_id=INVENTARIZATION_SPREADSHEET_ID, credentials_file_name=CREDENTIAL_FILE):
         super().__init__(spreadsheet_id, credentials_file_name)
