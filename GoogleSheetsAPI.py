@@ -25,6 +25,7 @@ class GoogleSheetOperator(object):
                 majorDimension=major_dimension
             ).execute()
         except Exception as e:
+            print(e)
             return values
         return values.get('values')
 

@@ -1,10 +1,10 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from settings import CHANNEL_ID
 from . import bot, logger, get_unauthorized_user_start_message, get_rm_group_keyboard, \
     keyboard_to_chose_users_groups, user_info, get_main_inline_keyboard, get_start_keyboard, main_movement_keyboard, \
-    get_edit_equipment_keyboard, get_kurpus_keyboard_for_create_movement, is_person
-from models import User, Links, Group, Equipment
+    get_edit_equipment_keyboard, get_kurpus_keyboard_for_create_movement, is_person, phone_serach_parameters, \
+    get_person_info, get_contact_reply_markup
+from models import User, Links, Group, Equipment, Person
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'Groups-list')
@@ -103,7 +103,7 @@ def add_user_to_group(call):
     reply_keyboard = InlineKeyboardMarkup()
     for group in all_groups:
         if group not in temp_user_groups:
-            reply_keyboard.row(
+            reply_keyboard.add(
                 InlineKeyboardButton(text=group.group_name,
                                      callback_data=f'group-to-add-user_{group.id}_{temp_user.id}'))
     bot.edit_message_text(
@@ -164,7 +164,7 @@ def rm_user_from_group(call):
     reply_keyboard = InlineKeyboardMarkup()
     for group in all_groups:
         if group in temp_user_groups:
-            reply_keyboard.row(
+            reply_keyboard.add(
                 InlineKeyboardButton(text=group.group_name,
                                      callback_data=f'group-to-remove-user_{group.id}_{temp_user.id}'))
     bot.edit_message_text(
@@ -380,3 +380,102 @@ def start_moving_equipment(call):
                           chat_id=user.telegram_id,
                           text='Введите кабинет для перемещения')
     User.update(status=f'create_movement/UK-{campus}/id-{equipment.id}').where(User.id == user.id).execute()
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('-')[0] == 'phone_number_search')
+def start_phone_search(call):
+    if not is_person(call.message.chat):
+        return
+    try:
+        user = User.get(telegram_id=call.message.chat.id)
+        if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Users'):
+            raise Exception("Unauthorized user")
+    except Exception:
+        logger.info(
+            f'User {user.first_name} {user.last_name} is not authorized!')
+        bot.send_message(text='У Вас нет доступа к этой функции', chat_id=call.message.chat.id)
+        return
+    User.update(status='main_phone_search').where(User.telegram_id == user.telegram_id).execute()
+    bot.edit_message_text(chat_id=call.message.chat.id,
+                          message_id=call.message.message_id,
+                          text='Выберите параметр поиска',
+                          reply_markup=phone_serach_parameters)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'Surname_phone_search')
+def surname_phone_search(call):
+    if not is_person(call.message.chat):
+        return
+    try:
+        user = User.get(telegram_id=call.message.chat.id)
+        if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Users'):
+            raise Exception("Unauthorized user")
+    except Exception:
+        logger.info(
+            f'User {user.first_name} {user.last_name} is not authorized!')
+        bot.send_message(text='У Вас нет доступа к этой функции', chat_id=call.message.chat.id)
+        return
+    User.update(status='surname/phone_search').where(User.telegram_id == user.telegram_id).execute()
+    bot.edit_message_text(chat_id=call.message.chat.id,
+                          message_id=call.message.message_id,
+                          text='Введите фамилию искомого человека')
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'Name_phone_search')
+def name_phone_search(call):
+    if not is_person(call.message.chat):
+        return
+    try:
+        user = User.get(telegram_id=call.message.chat.id)
+        if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Users'):
+            raise Exception("Unauthorized user")
+    except Exception:
+        logger.info(
+            f'User {user.first_name} {user.last_name} is not authorized!')
+        bot.send_message(text='У Вас нет доступа к этой функции', chat_id=call.message.chat.id)
+        return
+    User.update(status='name/phone_search').where(User.telegram_id == user.telegram_id).execute()
+    bot.edit_message_text(chat_id=call.message.chat.id,
+                          message_id=call.message.message_id,
+                          text='Введите имя и отчество искомого человека')
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'Number_phone_search')
+def number_phone_search(call):
+    if not is_person(call.message.chat):
+        return
+    try:
+        user = User.get(telegram_id=call.message.chat.id)
+        if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Users'):
+            raise Exception("Unauthorized user")
+    except Exception:
+        logger.info(
+            f'User {user.first_name} {user.last_name} is not authorized!')
+        bot.send_message(text='У Вас нет доступа к этой функции', chat_id=call.message.chat.id)
+        return
+    User.update(status='number/phone_search').where(User.telegram_id == user.telegram_id).execute()
+    bot.edit_message_text(chat_id=call.message.chat.id,
+                          message_id=call.message.message_id,
+                          text='Введите номер телефона искомого человека, начиная с +7')
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'ChActual')
+def number_phone_search(call):
+    if not is_person(call.message.chat):
+        return
+    try:
+        user = User.get(telegram_id=call.message.chat.id)
+        if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+            raise Exception("Unauthorized user")
+    except Exception:
+        logger.info(
+            f'User {user.first_name} {user.last_name} is not authorized!')
+        bot.send_message(text='У Вас нет доступа к этой функции', chat_id=call.message.chat.id)
+        return
+    person = Person.get(id=int(call.data.split('_')[1]))
+    Person.update(actual='True' if person.actual == 'False' else 'False').where(Person.id == person.id).execute()
+    person = Person.get(id=int(call.data.split('_')[1]))
+    bot.edit_message_text(chat_id=call.message.chat.id,
+                          text=get_person_info(person),
+                          message_id=call.message.message_id,
+                          reply_markup=get_contact_reply_markup(user, person))

@@ -42,6 +42,17 @@ class Movement(BaseModel):
     room = CharField()
 
 
+class Person(BaseModel):
+    name = CharField()
+    surname = CharField()
+    patronymic = CharField()
+    position = CharField()
+    photo = CharField()
+    phone = CharField()
+    email = CharField()
+    actual = CharField()
+
+
 def initialize_db():
     db.connect()
     db.create_tables([
@@ -49,7 +60,8 @@ def initialize_db():
         Group,
         Links,
         Equipment,
-        Movement
+        Movement,
+        Person
     ], safe=True)
     admin_group, created = Group.get_or_create(group_name='Admins')
     users_group, created = Group.get_or_create(group_name='Users')

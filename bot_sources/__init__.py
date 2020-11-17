@@ -3,8 +3,8 @@ from telebot import TeleBot, apihelper
 from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 
 from GoogleSheetsAPI import GoogleSync
-from models import User, Group, Links, Equipment, Movement
-from settings import BOT_TOKEN, BOT_PROXY, LOG_FILE
+from models import User, Group, Links, Equipment, Movement, Person
+from settings import BOT_TOKEN, BOT_PROXY, LOG_FILE, INVENTARIZATION_SPREADSHEET_ID
 
 logger.add(LOG_FILE)
 
@@ -41,35 +41,35 @@ def get_new_unauthorized_user_message(user: User):
 
 def get_start_keyboard(user: User):
     start_keyboard = ReplyKeyboardMarkup(True)
-    start_keyboard.row('На главную')
+    start_keyboard.add('На главную')
     return start_keyboard
 
 
 def get_main_inline_keyboard(user: User):
-    ret_keyboard = InlineKeyboardMarkup()
+    ret_keyboard = InlineKeyboardMarkup(row_width=3)
     if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Zavhoz'):
-        ret_keyboard.row(InlineKeyboardButton(text='Проверить расположение оборудования',
+        ret_keyboard.add(InlineKeyboardButton(text='Проверить расположение оборудования',
                                               callback_data='check_equipment'))
     if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
-        ret_keyboard.row(InlineKeyboardButton(text='Поиск и перемещение оборудования',
+        ret_keyboard.add(InlineKeyboardButton(text='Поиск и перемещение оборудования',
                                               callback_data='move_equipment'))
     if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Users'):
-        ret_keyboard.row(InlineKeyboardButton(text='Телефонный справочник',
+        ret_keyboard.add(InlineKeyboardButton(text='Телефонный справочник',
                                               callback_data='phone_number_search'))
     return ret_keyboard
 
 
 main_movement_keyboard = InlineKeyboardMarkup()
-main_movement_keyboard.row(InlineKeyboardButton(text='Инвентарный номер', callback_data='main_invent_search'))
-main_movement_keyboard.row(InlineKeyboardButton(text='Сарийный номер', callback_data='main_serial_search'))
+main_movement_keyboard.add(InlineKeyboardButton(text='Инвентарный номер', callback_data='main_invent_search'))
+main_movement_keyboard.add(InlineKeyboardButton(text='Сарийный номер', callback_data='main_serial_search'))
 
 groups_keyboard = InlineKeyboardMarkup()
-groups_keyboard.row(InlineKeyboardButton(text='Показать список всех групп', callback_data='Groups-list'))
-groups_keyboard.row(InlineKeyboardButton(text='Добавить группу', callback_data='ADD-group'))
-groups_keyboard.row(InlineKeyboardButton(text='Удалить группу', callback_data='RM-group'))
+groups_keyboard.add(InlineKeyboardButton(text='Показать список всех групп', callback_data='Groups-list'))
+groups_keyboard.add(InlineKeyboardButton(text='Добавить группу', callback_data='ADD-group'))
+groups_keyboard.add(InlineKeyboardButton(text='Удалить группу', callback_data='RM-group'))
 
 inventarization_inline_keyboard = InlineKeyboardMarkup()
-inventarization_inline_keyboard.row(InlineKeyboardButton(text='По инвентарному номеру'),
+inventarization_inline_keyboard.add(InlineKeyboardButton(text='По инвентарному номеру'),
                                     InlineKeyboardButton(text='По серийному номеру'))
 
 
@@ -77,8 +77,21 @@ def get_rm_group_keyboard():
     groups = Group.select()
     rm_group_keyboard = InlineKeyboardMarkup()
     for group in groups:
-        rm_group_keyboard.row(InlineKeyboardButton(text=group.group_name, callback_data=f'rm-group_{group.id}'))
+        rm_group_keyboard.add(InlineKeyboardButton(text=group.group_name, callback_data=f'rm-group_{group.id}'))
     return rm_group_keyboard
+
+
+def get_user_help_message(user: User):
+    ret_message = """Список доступных Вам команд:"""
+    if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
+        ret_message += """
+/all_users_info - информация о подключившихся пользователях
+/groups - работа с группами
+/google_update - получить изменения из таблицы"""
+    if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+        ret_message += """
+/phones_update - подгрузить новые номера из таблицы"""
+    return ret_message
 
 
 def get_admin_help_message():
@@ -90,7 +103,7 @@ def get_admin_help_message():
 
 def keyboard_to_chose_users_groups(user: User):
     keyboard = InlineKeyboardMarkup()
-    keyboard.row(InlineKeyboardButton(text='Добавить в группу', callback_data=f'add-user-to-group_{user.id}'),
+    keyboard.add(InlineKeyboardButton(text='Добавить в группу', callback_data=f'add-user-to-group_{user.id}'),
                  InlineKeyboardButton(text='Удалить из группы', callback_data=f'rm-user-from-group_{user.id}'))
     return keyboard
 
@@ -117,64 +130,90 @@ def equipment_info(equipment: Equipment):
 
 
 def send_equipment_info_to_google_sheet(equipment: Equipment):
-    GoogleSync().write_data_to_range(list_name='Список оборудования',
-                                     range_in_list=f'A{equipment.id + 1}:G{equipment.id + 1}',
-                                     data=[[
-                                         str(equipment.it_id),
-                                         str(equipment.pos_in_buh),
-                                         str(equipment.invent_num),
-                                         str(equipment.type),
-                                         str(equipment.mark),
-                                         str(equipment.model),
-                                         str(equipment.serial_num)
-                                     ]])
+    GoogleSync(spreadsheet_id=INVENTARIZATION_SPREADSHEET_ID).write_data_to_range(list_name='Список оборудования',
+                                                                                  range_in_list=f'A{equipment.id + 1}:G{equipment.id + 1}',
+                                                                                  data=[[
+                                                                                      str(equipment.it_id),
+                                                                                      str(equipment.pos_in_buh),
+                                                                                      str(equipment.invent_num),
+                                                                                      str(equipment.type),
+                                                                                      str(equipment.mark),
+                                                                                      str(equipment.model),
+                                                                                      str(equipment.serial_num)
+                                                                                  ]])
 
 
 def send_movement_to_google_sheet(equipment: Equipment, movement: Movement):
-    GoogleSync().write_data_to_range(list_name='Перемещение оборудования',
-                                     range_in_list=f'A{movement.id + 1}:G{movement.id + 1}',
-                                     data=[[
-                                         str(equipment.it_id),
-                                         str(movement.campus),
-                                         str(movement.room)
-                                     ]])
+    GoogleSync(spreadsheet_id=INVENTARIZATION_SPREADSHEET_ID).write_data_to_range(list_name='Перемещение оборудования',
+                                                                                  range_in_list=f'A{movement.id + 1}:G{movement.id + 1}',
+                                                                                  data=[[
+                                                                                      str(equipment.it_id),
+                                                                                      str(movement.campus),
+                                                                                      str(movement.room)
+                                                                                  ]])
 
 
 def get_equipment_reply_markup(equipment: Equipment):
     ret_markup = InlineKeyboardMarkup()
-    ret_markup.row(InlineKeyboardButton(text='Изменение информации',
+    ret_markup.add(InlineKeyboardButton(text='Изменение информации',
                                         callback_data=f'edit_info-{equipment.id}'))
-    ret_markup.row(InlineKeyboardButton(text='Перемещение оборудования',
+    ret_markup.add(InlineKeyboardButton(text='Перемещение оборудования',
                                         callback_data=f'move_equipment-{equipment.id}'))
     return ret_markup
 
 
 def get_edit_equipment_keyboard(equipment: Equipment):
     edit_equipment_keyboard = InlineKeyboardMarkup()
-    edit_equipment_keyboard.row(InlineKeyboardButton(text='Тип',
+    edit_equipment_keyboard.add(InlineKeyboardButton(text='Тип',
                                                      callback_data=f'edit/type-{equipment.id}'))
-    edit_equipment_keyboard.row(InlineKeyboardButton(text='Марка',
+    edit_equipment_keyboard.add(InlineKeyboardButton(text='Марка',
                                                      callback_data=f'edit/mark-{equipment.id}'))
-    edit_equipment_keyboard.row(InlineKeyboardButton(text='Модель',
+    edit_equipment_keyboard.add(InlineKeyboardButton(text='Модель',
                                                      callback_data=f'edit/model-{equipment.id}'))
-    edit_equipment_keyboard.row(InlineKeyboardButton(text='Серийный номер',
+    edit_equipment_keyboard.add(InlineKeyboardButton(text='Серийный номер',
                                                      callback_data=f'edit/serial-{equipment.id}'))
     return edit_equipment_keyboard
 
 
 def get_kurpus_keyboard_for_create_movement(equipment: Equipment):
     ret_keyboard = InlineKeyboardMarkup()
-    ret_keyboard.row(InlineKeyboardButton(text='УК 1', callback_data=f'choose_room-UK1-{equipment.id}'))
-    ret_keyboard.row(InlineKeyboardButton(text='УК 2', callback_data=f'choose_room-UK2-{equipment.id}'))
-    ret_keyboard.row(InlineKeyboardButton(text='УК 3', callback_data=f'choose_room-UK3-{equipment.id}'))
-    ret_keyboard.row(InlineKeyboardButton(text='УК 4', callback_data=f'choose_room-UK4-{equipment.id}'))
-    ret_keyboard.row(InlineKeyboardButton(text='УК 5', callback_data=f'choose_room-UK5-{equipment.id}'))
-    ret_keyboard.row(InlineKeyboardButton(text='УК 6', callback_data=f'choose_room-UK6-{equipment.id}'))
-    ret_keyboard.row(InlineKeyboardButton(text='УК 7', callback_data=f'choose_room-UK7-{equipment.id}'))
-    ret_keyboard.row(InlineKeyboardButton(text='УК 8', callback_data=f'choose_room-UK8-{equipment.id}'))
-    ret_keyboard.row(InlineKeyboardButton(text='УК 9', callback_data=f'choose_room-UK9-{equipment.id}'))
-    ret_keyboard.row(InlineKeyboardButton(text='УК 10', callback_data=f'choose_room-UK10-{equipment.id}'))
+    ret_keyboard.add(InlineKeyboardButton(text='УК 1', callback_data=f'choose_room-UK1-{equipment.id}'))
+    ret_keyboard.add(InlineKeyboardButton(text='УК 2', callback_data=f'choose_room-UK2-{equipment.id}'))
+    ret_keyboard.add(InlineKeyboardButton(text='УК 3', callback_data=f'choose_room-UK3-{equipment.id}'))
+    ret_keyboard.add(InlineKeyboardButton(text='УК 4', callback_data=f'choose_room-UK4-{equipment.id}'))
+    ret_keyboard.add(InlineKeyboardButton(text='УК 5', callback_data=f'choose_room-UK5-{equipment.id}'))
+    ret_keyboard.add(InlineKeyboardButton(text='УК 6', callback_data=f'choose_room-UK6-{equipment.id}'))
+    ret_keyboard.add(InlineKeyboardButton(text='УК 7', callback_data=f'choose_room-UK7-{equipment.id}'))
+    ret_keyboard.add(InlineKeyboardButton(text='УК 8', callback_data=f'choose_room-UK8-{equipment.id}'))
+    ret_keyboard.add(InlineKeyboardButton(text='УК 9', callback_data=f'choose_room-UK9-{equipment.id}'))
+    ret_keyboard.add(InlineKeyboardButton(text='УК 10', callback_data=f'choose_room-UK10-{equipment.id}'))
     return ret_keyboard
+
+
+phone_serach_parameters = InlineKeyboardMarkup()
+phone_serach_parameters.add(InlineKeyboardButton(text='Фамилия', callback_data='Surname_phone_search'))
+phone_serach_parameters.add(InlineKeyboardButton(text='Имя Отчество', callback_data='Name_phone_search'))
+phone_serach_parameters.add(InlineKeyboardButton(text='Телефон', callback_data='Number_phone_search'))
+
+
+def get_person_info(person: Person):
+    ret_str = f"""{person.surname} {person.name} {person.patronymic}
+Должность: {person.position}
+Телефон: {person.phone}
+E-mail: {person.email}"""
+    return ret_str
+
+
+def get_contact_reply_markup(user: User, person: Person):
+    reply_murkup = None
+    if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+        reply_murkup = InlineKeyboardMarkup()
+        reply_murkup.row(InlineKeyboardButton(text='Изменить',
+                                              callback_data=f"Change-person_{person.id}"),
+                         InlineKeyboardButton(text='Видимый ✅' if person.actual == 'True' else 'Невидимый ❌',
+                                              callback_data=f"ChActual_{person.id}"))
+
+    return reply_murkup
 
 
 import bot_sources.commands

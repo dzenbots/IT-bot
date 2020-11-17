@@ -1,10 +1,11 @@
 from telebot.types import Message
 
 from GoogleSheetsAPI import GoogleSync
-from models import User, Group, Links, Equipment, Movement
-from settings import CHANNEL_ID
+from models import User, Group, Links, Equipment, Movement, Person
+from settings import PHONE_SPREADSHEET_ID
 from . import bot, logger, user_info, get_unauthorized_user_start_message, get_new_unauthorized_user_message, \
-    get_admin_help_message, keyboard_to_chose_users_groups, groups_keyboard, get_start_keyboard, is_person
+    get_admin_help_message, keyboard_to_chose_users_groups, groups_keyboard, get_start_keyboard, is_person, \
+    get_user_help_message
 
 
 @bot.message_handler(commands=['start'])
@@ -49,11 +50,12 @@ def get_help(message: Message):
 Напиши администратору бота (@DzenBots)""",
                          chat_id=message.chat.id)
         return
-    if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
-        bot.send_message(text=get_admin_help_message(), chat_id=message.chat.id)
-        return
-    else:
-        bot.send_message(text='Для Вас пока нет доступных команд', chat_id=message.chat.id)
+    bot.send_message(text=get_user_help_message(user), chat_id=message.chat.id)
+    # if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
+    #     bot.send_message(text=get_admin_help_message(), chat_id=message.chat.id)
+    #     return
+    # if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+    #     bot.send_message()
 
 
 @bot.message_handler(commands=['groups'])
@@ -129,6 +131,24 @@ def google_update(message: Message):
                 Movement.create(equipment=Equipment.get(it_id=item[0]),
                                 campus=item[1],
                                 room=item[2])
+    cur_persons_count = Person.select().count()
+    gs_phones = GoogleSync(spreadsheet_id=PHONE_SPREADSHEET_ID)
+    persons_from_google = gs_phones.read_range(list_name='List1',
+                                               range_in_list=f'A{cur_persons_count + 2}:F')
+    for person in persons_from_google:
+        if len(person) < 6:
+            for j in range(len(person), 6):
+                person.append('')
+        Person.get_or_create(name=person[1],
+                             surname=person[0],
+                             patronymic=person[2],
+                             defaults={
+                                 'position': person[3],
+                                 'phone': f'+7{person[4]}',
+                                 'email': person[5],
+                                 'photo': '',
+                                 'actual': 'True'
+                             })
     bot.send_message(chat_id=user.telegram_id,
                      text='Данные получены')
     # if cur_equipments.count() <

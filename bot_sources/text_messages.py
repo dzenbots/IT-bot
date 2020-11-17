@@ -1,9 +1,9 @@
 from telebot.types import Message
 
-from models import User, Group, Links, Equipment, Movement
-from settings import CHANNEL_ID
+from models import User, Group, Links, Equipment, Movement, Person
 from . import bot, logger, get_unauthorized_user_start_message, get_main_inline_keyboard, equipment_info, \
-    get_equipment_reply_markup, send_equipment_info_to_google_sheet, send_movement_to_google_sheet, is_person
+    get_equipment_reply_markup, send_equipment_info_to_google_sheet, send_movement_to_google_sheet, is_person, \
+    get_person_info, get_contact_reply_markup
 
 
 @bot.message_handler(func=lambda message: message.text == 'На главную')
@@ -21,19 +21,19 @@ def go_main(message: Message):
                      reply_markup=get_main_inline_keyboard(user))
 
 
-@bot.message_handler(func=lambda message: message.text == 'Пост в канал')
-def channel_post(message: Message):
-    if not is_person(message.chat):
-        return
-    try:
-        user = User.get(telegram_id=message.chat.id)
-        if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
-            raise Exception("Unauthorized user")
-    except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
-        return
-    bot.send_message(text="<b>Test</b> <i>1234</i>", chat_id=CHANNEL_URL, parse_mode='html')
-    # bot.send_media_group(chat_id=CHANNEL_URL, media=[InputMediaPhoto()])
+# @bot.message_handler(func=lambda message: message.text == 'Пост в канал')
+# def channel_post(message: Message):
+#     if not is_person(message.chat):
+#         return
+#     try:
+#         user = User.get(telegram_id=message.chat.id)
+#         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
+#             raise Exception("Unauthorized user")
+#     except Exception:
+#         bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
+#         return
+#     bot.send_message(text="<b>Test</b> <i>1234</i>", chat_id=CHANNEL_URL, parse_mode='html')
+#     # bot.send_media_group(chat_id=CHANNEL_URL, media=[InputMediaPhoto()])
 
 
 @bot.message_handler(content_types=['text'])
@@ -129,7 +129,7 @@ def plain_text(message: Message):
                              reply_markup=get_equipment_reply_markup(equipment))
             send_equipment_info_to_google_sheet(equipment)
             logger.info(
-                f'User {user.first_name} {user.last_name} edit equipment ID {equipment.id}: new type is {equipment.type}')
+                f'User {user.first_name} {user.last_name} edit equipment ID {equipment.it_id}: new type is {equipment.type}')
     elif user.status.split('_')[0] == 'edit-mark':
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
             bot.send_message(chat_id=user.telegram_id,
@@ -144,7 +144,7 @@ def plain_text(message: Message):
                              reply_markup=get_equipment_reply_markup(equipment))
             send_equipment_info_to_google_sheet(equipment)
             logger.info(
-                f'User {user.first_name} {user.last_name} edit equipment ID {equipment.id}: new mark is {equipment.mark}')
+                f'User {user.first_name} {user.last_name} edit equipment ID {equipment.it_id}: new mark is {equipment.mark}')
     elif user.status.split('_')[0] == 'edit-model':
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
             bot.send_message(chat_id=user.telegram_id,
@@ -159,7 +159,7 @@ def plain_text(message: Message):
                              reply_markup=get_equipment_reply_markup(equipment))
             send_equipment_info_to_google_sheet(equipment)
             logger.info(
-                f'User {user.first_name} {user.last_name} edit equipment ID {equipment.id}: new model is {equipment.model}')
+                f'User {user.first_name} {user.last_name} edit equipment ID {equipment.it_id}: new model is {equipment.model}')
     elif user.status.split('_')[0] == 'edit-serial':
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
             bot.send_message(chat_id=user.telegram_id,
@@ -174,7 +174,7 @@ def plain_text(message: Message):
                              reply_markup=get_equipment_reply_markup(equipment))
             send_equipment_info_to_google_sheet(equipment)
             logger.info(
-                f'User {user.first_name} {user.last_name} edit equipment ID {equipment.id}: new serial num is {equipment.serial_num}')
+                f'User {user.first_name} {user.last_name} edit equipment ID {equipment.it_id}: new serial num is {equipment.serial_num}')
     elif user.status.split('/')[0] == 'create_movement':
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
             bot.send_message(chat_id=user.telegram_id,
@@ -193,7 +193,27 @@ def plain_text(message: Message):
                              reply_markup=get_equipment_reply_markup(equipment))
             send_movement_to_google_sheet(equipment, movement)
             logger.info(
-                f'User {user.first_name} {user.last_name} move equipment {equipment.it_id}: new location is {movement.campus} {movement.room}')
+                f'User {user.first_name} {user.last_name} move equipment ID {equipment.it_id}: new location is {movement.campus} {movement.room}')
+    elif user.status.split('/')[1] == 'phone_search':
+        search_parameter = user.status.split('/')[0]
+        template = message.text
+        founded_persons = None
+        if search_parameter == 'surname':
+            founded_persons = Person.select().where(Person.surname == template)
+        elif search_parameter == 'name':
+            founded_persons = Person.select().where(
+                Person.name == template.split(' ')[0] and Person.patronymic == template.split(' ')[1])
+        elif search_parameter == 'number':
+            founded_persons = Person.select().where(Person.phone == template)
+        if founded_persons is not None:
+            for person in founded_persons:
+                bot.send_message(chat_id=message.chat.id,
+                                 text=get_person_info(person),
+                                 reply_markup=get_contact_reply_markup(user, person))
+        else:
+            bot.send_message(chat_id=message.chat.id,
+                             text='Я никого не нашел по введенным Вами данным')
+
     else:
         bot.send_message(chat_id=message.chat.id,
                          text='Воспользуйтесь кнопками или командами (/help) для выбора функции')
