@@ -3,9 +3,8 @@ from telebot.types import Message
 from GoogleSheetsAPI import GoogleSync
 from models import User, Group, Links, Equipment, Movement, Person
 from settings import PHONE_SPREADSHEET_ID
-from . import bot, logger, user_info, get_unauthorized_user_start_message, get_new_unauthorized_user_message, \
-    get_admin_help_message, keyboard_to_chose_users_groups, groups_keyboard, get_start_keyboard, is_person, \
-    get_user_help_message
+from bot_sources import bot, logger, user_info, get_unauthorized_user_start_message, get_new_unauthorized_user_message, \
+    keyboard_to_chose_users_groups, groups_keyboard, get_start_keyboard, is_person, get_user_help_message
 
 
 @bot.message_handler(commands=['start'])
@@ -51,11 +50,6 @@ def get_help(message: Message):
                          chat_id=message.chat.id)
         return
     bot.send_message(text=get_user_help_message(user), chat_id=message.chat.id)
-    # if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
-    #     bot.send_message(text=get_admin_help_message(), chat_id=message.chat.id)
-    #     return
-    # if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
-    #     bot.send_message()
 
 
 @bot.message_handler(commands=['groups'])

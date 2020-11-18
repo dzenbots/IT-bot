@@ -216,6 +216,25 @@ def get_contact_reply_markup(user: User, person: Person):
     return reply_murkup
 
 
+def get_change_person_reply_markup(person: Person):
+    reply_murkup = InlineKeyboardMarkup(row_width=1)
+    reply_murkup.add(InlineKeyboardButton(text='Фамилия',
+                                          callback_data=f'Edit_person-surname_{person.id}'))
+    reply_murkup.add(InlineKeyboardButton(text='Имя',
+                                          callback_data=f'Edit_person-name_{person.id}'))
+    reply_murkup.add(InlineKeyboardButton(text='Отчество',
+                                          callback_data=f'Edit_person-patronymic_{person.id}'))
+    reply_murkup.add(InlineKeyboardButton(text='Телефон',
+                                          callback_data=f'Edit_person-phone_{person.id}'))
+    reply_murkup.add(InlineKeyboardButton(text='Фото',
+                                          callback_data=f'Edit_person-photo_{person.id}'))
+    reply_murkup.add(InlineKeyboardButton(text='Должность',
+                                          callback_data=f'Edit_person-position_{person.id}'))
+    reply_murkup.add(InlineKeyboardButton(text='e-mail',
+                                          callback_data=f'Edit_person-email_{person.id}'))
+    return reply_murkup
+
+
 import bot_sources.commands
 import bot_sources.text_messages
 import bot_sources.callbacks

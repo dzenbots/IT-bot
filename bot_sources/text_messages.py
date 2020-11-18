@@ -1,7 +1,7 @@
 from telebot.types import Message
 
 from models import User, Group, Links, Equipment, Movement, Person
-from . import bot, logger, get_unauthorized_user_start_message, get_main_inline_keyboard, equipment_info, \
+from bot_sources import bot, logger, get_unauthorized_user_start_message, get_main_inline_keyboard, equipment_info, \
     get_equipment_reply_markup, send_equipment_info_to_google_sheet, send_movement_to_google_sheet, is_person, \
     get_person_info, get_contact_reply_markup
 
@@ -205,6 +205,8 @@ def plain_text(message: Message):
                 Person.name == template.split(' ')[0] and Person.patronymic == template.split(' ')[1])
         elif search_parameter == 'number':
             founded_persons = Person.select().where(Person.phone == template)
+        if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+            founded_persons = founded_persons.where(Person.actual == 'True')
         if founded_persons is not None:
             for person in founded_persons:
                 bot.send_message(chat_id=message.chat.id,

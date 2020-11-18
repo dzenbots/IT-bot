@@ -1,9 +1,9 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from . import bot, logger, get_unauthorized_user_start_message, get_rm_group_keyboard, \
+from bot_sources import bot, logger, get_unauthorized_user_start_message, get_rm_group_keyboard, \
     keyboard_to_chose_users_groups, user_info, get_main_inline_keyboard, get_start_keyboard, main_movement_keyboard, \
     get_edit_equipment_keyboard, get_kurpus_keyboard_for_create_movement, is_person, phone_serach_parameters, \
-    get_person_info, get_contact_reply_markup
+    get_person_info, get_contact_reply_markup, get_change_person_reply_markup
 from models import User, Links, Group, Equipment, Person
 
 
@@ -479,3 +479,68 @@ def number_phone_search(call):
                           text=get_person_info(person),
                           message_id=call.message.message_id,
                           reply_markup=get_contact_reply_markup(user, person))
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('_')[0] == 'Change-person')
+def main_edit_person(call):
+    if not is_person(call.message.chat):
+        return
+    try:
+        user = User.get(telegram_id=call.message.chat.id)
+        if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+            raise Exception("Unauthorized user")
+    except Exception:
+        logger.info(
+            f'User {user.first_name} {user.last_name} is not authorized!')
+        bot.send_message(text='У Вас нет доступа к этой функции', chat_id=call.message.chat.id)
+        return
+    person = Person.get(id=call.data.split('_')[1])
+    User.update(status='Main_change_person_info').where(User.id == user.id).execute()
+    bot.send_message(chat_id=call.message.chat.id,
+                     text='Что редактируем?',
+                     reply_markup=get_change_person_reply_markup(person))
+
+
+@bot.callback_query_handler(func=lambda call: call.data.split('-')[0] == 'Edit_person')
+def main_edit_person(call):
+    if not is_person(call.message.chat):
+        return
+    try:
+        user = User.get(telegram_id=call.message.chat.id)
+        if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+            raise Exception("Unauthorized user")
+    except Exception:
+        logger.info(
+            f'User {user.first_name} {user.last_name} is not authorized!')
+        bot.send_message(text='У Вас нет доступа к этой функции', chat_id=call.message.chat.id)
+        return
+    edit_parameter = call.data.split('-')[1].split('_')[0]
+    User.update(status=f'Edit person info: {edit_parameter}').where(User.id == user.id).execute()
+    if edit_parameter == 'surname':
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              text='Введите новую фамилию')
+    elif edit_parameter == 'name':
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              text='Введите новое имя')
+    elif edit_parameter == 'patronymic':
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              text='Введите новое отчество')
+    elif edit_parameter == 'phone':
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              text='Введите новый номер телефона')
+    elif edit_parameter == 'photo':
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              text='Пришлите новую фотографию')
+    elif edit_parameter == 'email':
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              text='Введите новый e-mail')
+    elif edit_parameter == 'position':
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              text='Введите новую должность')
