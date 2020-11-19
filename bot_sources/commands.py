@@ -138,7 +138,7 @@ def google_update(message: Message):
                              patronymic=person[2],
                              defaults={
                                  'position': person[3],
-                                 'phone': f'+7{person[4]}',
+                                 'phone': f'+{person[4]}',
                                  'email': person[5],
                                  'photo': '',
                                  'actual': 'True'
