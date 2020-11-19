@@ -3,7 +3,7 @@ from telebot.types import Message
 from models import User, Group, Links, Equipment, Movement, Person
 from bot_sources import bot, logger, get_unauthorized_user_start_message, get_main_inline_keyboard, equipment_info, \
     get_equipment_reply_markup, send_equipment_info_to_google_sheet, send_movement_to_google_sheet, is_person, \
-    get_person_info, get_contact_reply_markup
+    get_person_info, get_contact_reply_markup, update_person_info_in_google
 
 
 @bot.message_handler(func=lambda message: message.text == 'На главную')
@@ -194,6 +194,35 @@ def plain_text(message: Message):
             send_movement_to_google_sheet(equipment, movement)
             logger.info(
                 f'User {user.first_name} {user.last_name} move equipment ID {equipment.it_id}: new location is {movement.campus} {movement.room}')
+    elif user.status.split(':')[0] == 'Edit_person_info':
+        if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+            bot.send_message(chat_id=user.telegram_id,
+                             text='У Вас нет доступа к этой функции')
+            logger.info(f'User {user.first_name} {user.last_name} had unsupported status!')
+        else:
+            edit_parameter = user.status.split(':')[1].split('_')[0]
+            person = Person.get(id=user.status.split(':')[1].split('_')[1])
+            if edit_parameter == 'surname':
+                Person.update(surname=message.text).where(Person.id == person.id).execute()
+            elif edit_parameter == 'name':
+                Person.update(name=message.text).where(Person.id == person.id).execute()
+            elif edit_parameter == 'patronymic':
+                Person.update(patronymic=message.text).where(Person.id == person.id).execute()
+            elif edit_parameter == 'phone':
+                Person.update(phone=message.text).where(Person.id == person.id).execute()
+            elif edit_parameter == 'position':
+                Person.update(position=message.text).where(Person.id == person.id).execute()
+            elif edit_parameter == 'email':
+                Person.update(email=message.text).where(Person.id == person.id).execute()
+            elif edit_parameter == 'photo':
+                bot.send_message(chat_id=message.chat.id,
+                                 text='Для редактирования фото сотрудника необходимо прислать фото, а не текст!')
+                return
+            person = Person.get(id=user.status.split(':')[1].split('_')[1])
+            update_person_info_in_google(person)
+            bot.send_message(chat_id=message.chat.id,
+                             text=get_person_info(person),
+                             reply_markup=get_contact_reply_markup(user, person))
     elif user.status.split('/')[1] == 'phone_search':
         search_parameter = user.status.split('/')[0]
         template = message.text
@@ -206,9 +235,14 @@ def plain_text(message: Message):
         elif search_parameter == 'number':
             founded_persons = Person.select().where(Person.phone == template)
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
-            founded_persons = founded_persons.where(Person.actual == 'True')
-        if founded_persons is not None:
+            founded_persons = Person.select().where(Person.surname == template).where(Person.actual == 'True')
+        if founded_persons.count() > 0:
             for person in founded_persons:
+                bot.send_contact(chat_id=message.chat.id,
+                                 phone_number=person.phone,
+                                 first_name=person.surname,
+                                 last_name=f"{person.name} {person.patronymic}")
+
                 bot.send_message(chat_id=message.chat.id,
                                  text=get_person_info(person),
                                  reply_markup=get_contact_reply_markup(user, person))

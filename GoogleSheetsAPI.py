@@ -44,6 +44,7 @@ class GoogleSheetOperator(object):
                 }
             ).execute()
         except Exception as e:
+            print(e)
             return
 
 

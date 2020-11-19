@@ -4,7 +4,7 @@ from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeybo
 
 from GoogleSheetsAPI import GoogleSync
 from models import User, Group, Links, Equipment, Movement, Person
-from settings import BOT_TOKEN, BOT_PROXY, LOG_FILE, INVENTARIZATION_SPREADSHEET_ID
+from settings import BOT_TOKEN, BOT_PROXY, LOG_FILE, INVENTARIZATION_SPREADSHEET_ID, PHONE_SPREADSHEET_ID
 
 logger.add(LOG_FILE)
 
@@ -199,7 +199,6 @@ phone_serach_parameters.add(InlineKeyboardButton(text='Телефон', callback
 def get_person_info(person: Person):
     ret_str = f"""{person.surname} {person.name} {person.patronymic}
 Должность: {person.position}
-Телефон: {person.phone}
 E-mail: {person.email}"""
     return ret_str
 
@@ -233,6 +232,19 @@ def get_change_person_reply_markup(person: Person):
     reply_murkup.add(InlineKeyboardButton(text='e-mail',
                                           callback_data=f'Edit_person-email_{person.id}'))
     return reply_murkup
+
+
+def update_person_info_in_google(person: Person):
+    GoogleSync(spreadsheet_id=PHONE_SPREADSHEET_ID).write_data_to_range(list_name='List1',
+                                                                        range_in_list=f'A{person.id + 1}:F{person.id + 1}',
+                                                                        data=[[
+                                                                            str(person.surname),
+                                                                            str(person.name),
+                                                                            str(person.patronymic),
+                                                                            str(person.position),
+                                                                            str(person.phone),
+                                                                            str(person.email)
+                                                                        ]])
 
 
 import bot_sources.commands

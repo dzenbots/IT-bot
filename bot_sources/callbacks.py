@@ -515,7 +515,8 @@ def main_edit_person(call):
         bot.send_message(text='У Вас нет доступа к этой функции', chat_id=call.message.chat.id)
         return
     edit_parameter = call.data.split('-')[1].split('_')[0]
-    User.update(status=f'Edit person info: {edit_parameter}').where(User.id == user.id).execute()
+    person = Person.get(id=call.data.split('-')[1].split('_')[1])
+    User.update(status=f'Edit_person_info:{edit_parameter}_{person.id}').where(User.id == user.id).execute()
     if edit_parameter == 'surname':
         bot.edit_message_text(chat_id=call.message.chat.id,
                               message_id=call.message.message_id,
