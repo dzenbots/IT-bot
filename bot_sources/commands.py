@@ -18,8 +18,8 @@ def get_start(message: Message):
     except Exception:
         logger.info('Unauthorized user')
         user, created = User.get_or_create(telegram_id=message.chat.id,
-                                           first_name=message.from_user.first_name,
-                                           last_name=message.from_user.last_name,
+                                           first_name=message.from_user.first_name if message.from_user.first_name is not None else '',
+                                           last_name=message.from_user.last_name if message.from_user.last_name is not None else '',
                                            status='waiting for access')
         unauth_group, created = Group.get_or_create(group_name='Unauthorized')
         Links.create(user=user, group=unauth_group)
