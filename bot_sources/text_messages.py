@@ -243,10 +243,17 @@ def plain_text(message: Message):
             else:
                 founded_persons = Person.select().where(Person.surname == template)
         elif search_parameter == 'name':
-            founded_persons = Person.select().where(
-                Person.name == template.split(' ')[0] and Person.patronymic == template.split(' ')[1])
+            if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+                founded_persons = Person.select().where(
+                    Person.name == template.split(' ')[0] and Person.patronymic == template.split(' ')[1]).where(Person.actual == 'True')
+            else:
+                founded_persons = Person.select().where(
+                    Person.name == template.split(' ')[0] and Person.patronymic == template.split(' ')[1])
         elif search_parameter == 'number':
-            founded_persons = Person.select().where(Person.phone == template)
+            if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+                founded_persons = Person.select().where(Person.phone == template).where(Person.actual == 'True')
+            else:
+                founded_persons = Person.select().where(Person.phone == template)
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
             founded_persons = founded_persons.where(Person.actual == 'True')
         if founded_persons.count() > 0:
