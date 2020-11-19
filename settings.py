@@ -18,3 +18,6 @@ USER_SECRET = os.environ.get('USER_SECRET')
 LOG_FILE = os.environ.get('LOG_FILE')
 
 CHANNEL_URL = os.environ.get('CHANNEL_URL')
+
+IT_SUPPORT_TABLE = os.environ.get('IT_SUPPORT_TABLE')
+IT_SUPPORT_FORM = os.environ.get('IT_SUPPORT_FORM')

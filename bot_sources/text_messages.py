@@ -220,9 +220,19 @@ def plain_text(message: Message):
                 return
             person = Person.get(id=user.status.split(':')[1].split('_')[1])
             update_person_info_in_google(person)
-            bot.send_message(chat_id=message.chat.id,
-                             text=get_person_info(person),
-                             reply_markup=get_contact_reply_markup(user, person))
+            if not person.photo == '':
+                bot.send_photo(chat_id=message.chat.id,
+                               photo=person.photo,
+                               caption=get_person_info(person),
+                               reply_markup=get_contact_reply_markup(user, person))
+            else:
+                bot.send_message(chat_id=message.chat.id,
+                                 text=get_person_info(person),
+                                 reply_markup=get_contact_reply_markup(user, person))
+            bot.send_contact(chat_id=message.chat.id,
+                             phone_number=person.phone,
+                             first_name=person.surname,
+                             last_name=f"{person.name} {person.patronymic}")
     elif user.status.split('/')[1] == 'phone_search':
         search_parameter = user.status.split('/')[0]
         template = message.text
@@ -238,14 +248,20 @@ def plain_text(message: Message):
             founded_persons = Person.select().where(Person.surname == template).where(Person.actual == 'True')
         if founded_persons.count() > 0:
             for person in founded_persons:
+                if not person.photo == '':
+                    bot.send_photo(chat_id=message.chat.id,
+                                   photo=person.photo,
+                                   caption=get_person_info(person),
+                                   reply_markup=get_contact_reply_markup(user, person))
+                else:
+                    bot.send_message(chat_id=message.chat.id,
+                                     text=get_person_info(person),
+                                     reply_markup=get_contact_reply_markup(user, person))
                 bot.send_contact(chat_id=message.chat.id,
                                  phone_number=person.phone,
                                  first_name=person.surname,
                                  last_name=f"{person.name} {person.patronymic}")
 
-                bot.send_message(chat_id=message.chat.id,
-                                 text=get_person_info(person),
-                                 reply_markup=get_contact_reply_markup(user, person))
         else:
             bot.send_message(chat_id=message.chat.id,
                              text='Я никого не нашел по введенным Вами данным')

@@ -4,7 +4,8 @@ from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeybo
 
 from GoogleSheetsAPI import GoogleSync
 from models import User, Group, Links, Equipment, Movement, Person
-from settings import BOT_TOKEN, BOT_PROXY, LOG_FILE, INVENTARIZATION_SPREADSHEET_ID, PHONE_SPREADSHEET_ID
+from settings import BOT_TOKEN, BOT_PROXY, LOG_FILE, INVENTARIZATION_SPREADSHEET_ID, PHONE_SPREADSHEET_ID, \
+    IT_SUPPORT_TABLE, IT_SUPPORT_FORM
 
 logger.add(LOG_FILE)
 
@@ -56,6 +57,12 @@ def get_main_inline_keyboard(user: User):
     if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Users'):
         ret_keyboard.add(InlineKeyboardButton(text='Телефонный справочник',
                                               callback_data='phone_number_search'))
+    if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'SysAdmins'):
+        ret_keyboard.add(InlineKeyboardButton(text='Таблица заявок',
+                                              url=IT_SUPPORT_TABLE))
+    if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Users'):
+        ret_keyboard.add(InlineKeyboardButton(text='Форма обращений в IT-службу',
+                                              url=IT_SUPPORT_FORM))
     return ret_keyboard
 
 
@@ -250,3 +257,4 @@ def update_person_info_in_google(person: Person):
 import bot_sources.commands
 import bot_sources.text_messages
 import bot_sources.callbacks
+import bot_sources.photo_messages
