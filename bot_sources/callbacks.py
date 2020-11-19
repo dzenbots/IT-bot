@@ -415,7 +415,7 @@ def surname_phone_search(call):
             f'User {user.first_name} {user.last_name} is not authorized!')
         bot.send_message(text='У Вас нет доступа к этой функции', chat_id=call.message.chat.id)
         return
-    User.update(status='surname/phone_search').where(User.telegram_id == user.telegram_id).execute()
+    User.update(status='phone_search/surname').where(User.telegram_id == user.telegram_id).execute()
     bot.edit_message_text(chat_id=call.message.chat.id,
                           message_id=call.message.message_id,
                           text='Введите фамилию искомого человека')

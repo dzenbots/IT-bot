@@ -233,19 +233,22 @@ def plain_text(message: Message):
                              phone_number=person.phone,
                              first_name=person.surname,
                              last_name=f"{person.name} {person.patronymic}")
-    elif user.status.split('/')[1] == 'phone_search':
-        search_parameter = user.status.split('/')[0]
+    elif user.status.split('/')[0] == 'phone_search':
+        search_parameter = user.status.split('/')[1]
         template = message.text
         founded_persons = None
         if search_parameter == 'surname':
-            founded_persons = Person.select().where(Person.surname == template)
+            if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+                founded_persons = Person.select().where(Person.surname == template).where(Person.actual == 'True')
+            else:
+                founded_persons = Person.select().where(Person.surname == template)
         elif search_parameter == 'name':
             founded_persons = Person.select().where(
                 Person.name == template.split(' ')[0] and Person.patronymic == template.split(' ')[1])
         elif search_parameter == 'number':
             founded_persons = Person.select().where(Person.phone == template)
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
-            founded_persons = Person.select().where(Person.surname == template).where(Person.actual == 'True')
+            founded_persons = founded_persons.where(Person.actual == 'True')
         if founded_persons.count() > 0:
             for person in founded_persons:
                 if not person.photo == '':
@@ -261,11 +264,9 @@ def plain_text(message: Message):
                                  phone_number=person.phone,
                                  first_name=person.surname,
                                  last_name=f"{person.name} {person.patronymic}")
-
         else:
             bot.send_message(chat_id=message.chat.id,
                              text='Я никого не нашел по введенным Вами данным')
-
     else:
         bot.send_message(chat_id=message.chat.id,
                          text='Воспользуйтесь кнопками или командами (/help) для выбора функции')
