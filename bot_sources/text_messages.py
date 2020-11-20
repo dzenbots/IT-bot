@@ -170,7 +170,7 @@ def plain_text(message: Message):
             room = message.text
             equipment = Equipment.get(id=user.status.split('/')[2].split('-')[1])
             movement = Movement.create(equipment=equipment,
-                                       campus=f'УК {campus}',
+                                       campus=f'УК {campus}' if not campus == 'spisanie' else 'Списание',
                                        room=room)
             equipment = Equipment.get(id=user.status.split('/')[2].split('-')[1])
             bot.send_message(chat_id=user.telegram_id,

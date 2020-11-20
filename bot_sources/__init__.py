@@ -194,6 +194,7 @@ def get_kurpus_keyboard_for_create_movement(equipment: Equipment):
     ret_keyboard.add(InlineKeyboardButton(text='УК 8', callback_data=f'choose_room-UK8-{equipment.id}'))
     ret_keyboard.add(InlineKeyboardButton(text='УК 9', callback_data=f'choose_room-UK9-{equipment.id}'))
     ret_keyboard.add(InlineKeyboardButton(text='УК 10', callback_data=f'choose_room-UK10-{equipment.id}'))
+    ret_keyboard.add(InlineKeyboardButton(text='Списание', callback_data=f'choose_room-UKspisanie-{equipment.id}'))
     return ret_keyboard
 
 
