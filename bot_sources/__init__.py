@@ -13,8 +13,6 @@ apihelper.proxy = BOT_PROXY
 bot = TeleBot(token=BOT_TOKEN, num_threads=4)
 
 
-
-
 def is_person(chat):
     if chat.type == 'private':
         return True

@@ -21,21 +21,6 @@ def go_main(message: Message):
                      reply_markup=get_main_inline_keyboard(user))
 
 
-# @bot.message_handler(func=lambda message: message.text == 'Пост в канал')
-# def channel_post(message: Message):
-#     if not is_person(message.chat):
-#         return
-#     try:
-#         user = User.get(telegram_id=message.chat.id)
-#         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
-#             raise Exception("Unauthorized user")
-#     except Exception:
-#         bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
-#         return
-#     bot.send_message(text="<b>Test</b> <i>1234</i>", chat_id=CHANNEL_URL, parse_mode='html')
-#     # bot.send_media_group(chat_id=CHANNEL_URL, media=[InputMediaPhoto()])
-
-
 @bot.message_handler(content_types=['text'])
 def plain_text(message: Message):
     if not is_person(message.chat):
