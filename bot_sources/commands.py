@@ -125,24 +125,39 @@ def google_update(message: Message):
                 Movement.create(equipment=Equipment.get(it_id=item[0]),
                                 campus=item[1],
                                 room=item[2])
+    bot.send_message(chat_id=user.telegram_id,
+                     text='Данные получены')
+
+
+@bot.message_handler(commands=['phones_update'])
+def phones_update(message: Message):
+    if not is_person(message.chat):
+        return
+    try:
+        user = User.get(telegram_id=message.chat.id)
+        if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
+            raise Exception("Unauthorized user")
+    except Exception:
+        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
+        return
     cur_persons_count = Person.select().count()
     gs_phones = GoogleSync(spreadsheet_id=PHONE_SPREADSHEET_ID)
     persons_from_google = gs_phones.read_range(list_name='List1',
                                                range_in_list=f'A{cur_persons_count + 2}:F')
-    for person in persons_from_google:
-        if len(person) < 6:
-            for j in range(len(person), 6):
-                person.append('')
-        Person.get_or_create(name=person[1],
-                             surname=person[0],
-                             patronymic=person[2],
-                             defaults={
-                                 'position': person[3],
-                                 'phone': f'+{person[4]}',
-                                 'email': person[5],
-                                 'photo': '',
-                                 'actual': 'True'
-                             })
+    if persons_from_google is not None:
+        for person in persons_from_google:
+            if len(person) < 6:
+                for j in range(len(person), 6):
+                    person.append('')
+            Person.get_or_create(name=person[1],
+                                 surname=person[0],
+                                 patronymic=person[2],
+                                 defaults={
+                                     'position': person[3],
+                                     'phone': f'+{person[4]}',
+                                     'email': person[5],
+                                     'photo': '',
+                                     'actual': 'True'
+                                 })
     bot.send_message(chat_id=user.telegram_id,
                      text='Данные получены')
-    # if cur_equipments.count() <
