@@ -49,19 +49,19 @@ def get_start_keyboard(user: User):
 def get_main_inline_keyboard(user: User):
     ret_keyboard = InlineKeyboardMarkup(row_width=3)
     if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Zavhoz'):
-        ret_keyboard.add(InlineKeyboardButton(text='Проверить расположение оборудования',
+        ret_keyboard.add(InlineKeyboardButton(text=' 🔍 Проверить расположение оборудования',
                                               callback_data='check_equipment'))
     if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Inventarization'):
-        ret_keyboard.add(InlineKeyboardButton(text='Поиск и перемещение оборудования',
+        ret_keyboard.add(InlineKeyboardButton(text=' 🔍 Поиск и перемещение оборудования',
                                               callback_data='move_equipment'))
     if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Users'):
-        ret_keyboard.add(InlineKeyboardButton(text='Телефонный справочник',
+        ret_keyboard.add(InlineKeyboardButton(text=' ☎️ Телефонный справочник',
                                               callback_data='phone_number_search'))
     if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'SysAdmins'):
-        ret_keyboard.add(InlineKeyboardButton(text='Таблица заявок',
+        ret_keyboard.add(InlineKeyboardButton(text=' 📋 Таблица заявок',
                                               url=IT_SUPPORT_TABLE))
     if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Users'):
-        ret_keyboard.add(InlineKeyboardButton(text='Форма обращений в IT-службу',
+        ret_keyboard.add(InlineKeyboardButton(text=' 🆘 Форма обращений в IT-службу',
                                               url=IT_SUPPORT_FORM))
     return ret_keyboard
 
@@ -202,6 +202,82 @@ phone_serach_parameters = InlineKeyboardMarkup()
 phone_serach_parameters.add(InlineKeyboardButton(text='Фамилия', callback_data='Surname_phone_search'))
 phone_serach_parameters.add(InlineKeyboardButton(text='Имя Отчество', callback_data='Name_phone_search'))
 phone_serach_parameters.add(InlineKeyboardButton(text='Телефон', callback_data='Number_phone_search'))
+phone_serach_parameters.add(InlineKeyboardButton(text='Классный руководитель', callback_data='KlassRuk_phone_search'))
+
+
+def get_classes_table():
+    ret_keyboard = InlineKeyboardMarkup()
+    ret_keyboard.row(InlineKeyboardButton(text='1А', callback_data='класс_1А'),
+                     InlineKeyboardButton(text='1Б', callback_data='класс_1Б'),
+                     InlineKeyboardButton(text='1В', callback_data='класс_1В'),
+                     InlineKeyboardButton(text='1Г', callback_data='класс_1Г'),
+                     InlineKeyboardButton(text='1Д', callback_data='класс_1Д'),
+                     InlineKeyboardButton(text='1М', callback_data='класс_1М'),
+                     InlineKeyboardButton(text='1Н', callback_data='класс_1Н')
+                     )
+    ret_keyboard.row(InlineKeyboardButton(text='2А', callback_data='класс_2А'),
+                     InlineKeyboardButton(text='2Б', callback_data='класс_2Б'),
+                     InlineKeyboardButton(text='2В', callback_data='класс_2В'),
+                     InlineKeyboardButton(text='2Г', callback_data='класс_2Г'),
+                     InlineKeyboardButton(text='2Д', callback_data='класс_2Д'),
+                     InlineKeyboardButton(text='2Л', callback_data='класс_2Л'),
+                     InlineKeyboardButton(text='2М', callback_data='класс_2М')
+                     )
+    ret_keyboard.row(InlineKeyboardButton(text='3А', callback_data='класс_3А'),
+                     InlineKeyboardButton(text='3Б', callback_data='класс_3Б'),
+                     InlineKeyboardButton(text='3В', callback_data='класс_3В'),
+                     InlineKeyboardButton(text='3Л', callback_data='класс_3Л'),
+                     InlineKeyboardButton(text='3М', callback_data='класс_3М'),
+                     InlineKeyboardButton(text='3У', callback_data='класс_3У')
+                     )
+    ret_keyboard.row(InlineKeyboardButton(text='4А', callback_data='класс_4А'),
+                     InlineKeyboardButton(text='4Б', callback_data='класс_4Б'),
+                     InlineKeyboardButton(text='4В', callback_data='класс_4В'),
+                     InlineKeyboardButton(text='4Г', callback_data='класс_4Г'),
+                     InlineKeyboardButton(text='4Л', callback_data='класс_4Л'),
+                     InlineKeyboardButton(text='4М', callback_data='класс_4М'),
+                     InlineKeyboardButton(text='4У', callback_data='класс_4У')
+                     )
+    ret_keyboard.row(InlineKeyboardButton(text='5А', callback_data='класс_5А'),
+                     InlineKeyboardButton(text='5Б', callback_data='класс_5Б'),
+                     InlineKeyboardButton(text='5В', callback_data='класс_5В'),
+                     InlineKeyboardButton(text='5Д', callback_data='класс_5Д'),
+                     InlineKeyboardButton(text='5Л', callback_data='класс_5Л'),
+                     InlineKeyboardButton(text='5М', callback_data='класс_5М'),
+                     InlineKeyboardButton(text='5Н', callback_data='класс_5Н')
+                     )
+    ret_keyboard.row(InlineKeyboardButton(text='6А', callback_data='класс_6А'),
+                     InlineKeyboardButton(text='6Б', callback_data='класс_6Б'),
+                     InlineKeyboardButton(text='6В', callback_data='класс_6В'),
+                     InlineKeyboardButton(text='6Г', callback_data='класс_6Г'),
+                     InlineKeyboardButton(text='6Д', callback_data='класс_6Д'),
+                     InlineKeyboardButton(text='6Л', callback_data='класс_6Л'),
+                     InlineKeyboardButton(text='6М', callback_data='класс_6М')
+                     )
+    ret_keyboard.row(InlineKeyboardButton(text='7А', callback_data='класс_7А'),
+                     InlineKeyboardButton(text='7Б', callback_data='класс_7Б'),
+                     InlineKeyboardButton(text='7Г', callback_data='класс_7Г'),
+                     InlineKeyboardButton(text='7Д', callback_data='класс_7Д'),
+                     InlineKeyboardButton(text='7К', callback_data='класс_7К'),
+                     InlineKeyboardButton(text='7М', callback_data='класс_7М'),
+                     InlineKeyboardButton(text='7Н', callback_data='класс_7Н')
+                     )
+    ret_keyboard.row(InlineKeyboardButton(text='8И', callback_data='класс_8И'),
+                     InlineKeyboardButton(text='8К', callback_data='класс_8К'),
+                     InlineKeyboardButton(text='8М', callback_data='класс_8М'),
+                     InlineKeyboardButton(text='8С', callback_data='класс_8С'),
+                     InlineKeyboardButton(text='8Э', callback_data='класс_8Э'),
+                     InlineKeyboardButton(text='8Я', callback_data='класс_8Я')
+                     )
+    ret_keyboard.row(InlineKeyboardButton(text='9А', callback_data='класс_9А'),
+                     InlineKeyboardButton(text='9Б', callback_data='класс_9Б'),
+                     InlineKeyboardButton(text='9В', callback_data='класс_9В'),
+                     InlineKeyboardButton(text='9Г', callback_data='класс_9Г'),
+                     InlineKeyboardButton(text='9К', callback_data='класс_9К'),
+                     InlineKeyboardButton(text='9Л', callback_data='класс_9Л'),
+                     InlineKeyboardButton(text='9М', callback_data='класс_9М')
+                     )
+    return ret_keyboard
 
 
 def get_person_info(person: Person):
