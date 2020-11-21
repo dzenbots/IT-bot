@@ -1,7 +1,7 @@
 from telebot.types import Message
 
 from bot_sources import bot, logger, is_person, get_unauthorized_user_start_message, get_person_info, \
-    get_contact_reply_markup
+    get_contact_reply_markup, update_person_info_in_google
 from models import User, Links, Group, Person
 
 
@@ -43,3 +43,5 @@ def receive_photo(message: Message):
                                  phone_number=person.phone,
                                  first_name=person.surname,
                                  last_name=f"{person.name} {person.patronymic}")
+                person = Person.get(id=user.status.split(':')[1].split('_')[1])
+                update_person_info_in_google(person)

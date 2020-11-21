@@ -244,12 +244,13 @@ def get_change_person_reply_markup(person: Person):
 
 def update_person_info_in_google(person: Person):
     GoogleSync(spreadsheet_id=PHONE_SPREADSHEET_ID).write_data_to_range(list_name='List1',
-                                                                        range_in_list=f'A{person.id + 1}:F{person.id + 1}',
+                                                                        range_in_list=f'A{person.id + 1}:G{person.id + 1}',
                                                                         data=[[
                                                                             str(person.surname),
                                                                             str(person.name),
                                                                             str(person.patronymic),
                                                                             str(person.position),
+                                                                            str(person.photo),
                                                                             str(person.phone),
                                                                             str(person.email)
                                                                         ]])
