@@ -161,20 +161,20 @@ def google_update(message: Message):
     cur_persons_count = Person.select().count()
     gs_phones = GoogleSync(spreadsheet_id=PHONE_SPREADSHEET_ID)
     persons_from_google = gs_phones.read_range(list_name='List1',
-                                               range_in_list=f'A{cur_persons_count + 2}:F')
+                                               range_in_list=f'A{cur_persons_count + 2}:G')
     if persons_from_google is not None:
         for person in persons_from_google:
-            if len(person) < 6:
-                for j in range(len(person), 6):
+            if len(person) < 7:
+                for j in range(len(person), 7):
                     person.append('')
             Person.get_or_create(name=person[1],
                                  surname=person[0],
                                  patronymic=person[2],
                                  defaults={
                                      'position': person[3],
-                                     'phone': f'+{person[4]}',
-                                     'email': person[5],
-                                     'photo': '',
+                                     'photo': person[4],
+                                     'phone': f'+{person[5]}',
+                                     'email': person[6],
                                      'actual': 'True'
                                  })
     bot.send_message(chat_id=user.telegram_id,
