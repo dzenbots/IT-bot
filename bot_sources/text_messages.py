@@ -1,6 +1,3 @@
-import io
-import os
-
 from telebot.types import Message
 
 from models import User, Group, Links, Equipment, Movement, Person
