@@ -320,7 +320,6 @@ def send_contact_info(chat_id, person: Person, user: User):
     vcf.write('BEGIN:VCARD' + "\n")
     vcf.write('VERSION:3.0' + "\n")
     vcf.write('N:' + f'{person.surname};{person.name};{person.patronymic}' + "\n")
-    # vcf.write('FN:' + person.name + ' ' + person.patronymic + "\n")
     vcf.write('ORG:' + 'ГБОУ Школа \" Дмитровский\"' + "\n")
     vcf.write('TEL;CELL:' + person.phone + "\n")
     vcf.write('EMAIL:' + person.email + "\n")
