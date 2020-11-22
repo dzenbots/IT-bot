@@ -1,9 +1,12 @@
+import io
+import os
+
 from telebot.types import Message
 
 from models import User, Group, Links, Equipment, Movement, Person
 from bot_sources import bot, logger, get_unauthorized_user_start_message, get_main_inline_keyboard, equipment_info, \
     get_equipment_reply_markup, send_equipment_info_to_google_sheet, send_movement_to_google_sheet, is_person, \
-    get_person_info, get_contact_reply_markup, update_person_info_in_google
+    get_person_info, get_contact_reply_markup, update_person_info_in_google, send_contact_info
 
 
 @bot.message_handler(func=lambda message: message.text == 'На главную')
@@ -243,19 +246,7 @@ def plain_text(message: Message):
             founded_persons = founded_persons.where(Person.actual == 'True')
         if founded_persons.count() > 0:
             for person in founded_persons:
-                if not person.photo == '':
-                    bot.send_photo(chat_id=message.chat.id,
-                                   photo=person.photo,
-                                   caption=get_person_info(person),
-                                   reply_markup=get_contact_reply_markup(user, person))
-                else:
-                    bot.send_message(chat_id=message.chat.id,
-                                     text=get_person_info(person),
-                                     reply_markup=get_contact_reply_markup(user, person))
-                bot.send_contact(chat_id=message.chat.id,
-                                 phone_number=person.phone,
-                                 first_name=person.surname,
-                                 last_name=f"{person.name} {person.patronymic}")
+                send_contact_info(chat_id=message.chat.id, person=person, user=user)
         else:
             bot.send_message(chat_id=message.chat.id,
                              text='Я никого не нашел по введенным Вами данным')

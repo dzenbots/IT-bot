@@ -1,3 +1,5 @@
+import io
+
 from loguru import logger
 from telebot import TeleBot, apihelper
 from telebot.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
@@ -297,6 +299,38 @@ def get_contact_reply_markup(user: User, person: Person):
                                               callback_data=f"ChActual_{person.id}"))
 
     return reply_murkup
+
+
+def send_contact_info(chat_id, person: Person, user: User):
+    if not person.photo == '':
+        bot.send_photo(chat_id=chat_id,
+                       photo=person.photo,
+                       caption=get_person_info(person),
+                       reply_markup=get_contact_reply_markup(user, person))
+    else:
+        bot.send_message(chat_id=chat_id,
+                         text=get_person_info(person),
+                         reply_markup=get_contact_reply_markup(user, person))
+    bot.send_contact(chat_id=chat_id,
+                     phone_number=person.phone,
+                     first_name=person.surname,
+                     last_name=f"{person.name} {person.patronymic}")
+    vcf = io.StringIO()
+    vcf.name = f'{person.surname} {person.name} {person.patronymic}.vcf'
+    vcf.write('BEGIN:VCARD' + "\n")
+    vcf.write('VERSION:3.0' + "\n")
+    vcf.write('N:' + f'{person.surname};{person.name};{person.patronymic}' + "\n")
+    # vcf.write('FN:' + person.name + ' ' + person.patronymic + "\n")
+    vcf.write('ORG:' + 'ГБОУ Школа \" Дмитровский\"' + "\n")
+    vcf.write('TEL;CELL:' + person.phone + "\n")
+    vcf.write('EMAIL:' + person.email + "\n")
+    vcf.write('END:VCARD' + "\n")
+    vcf.write("\n")
+    vcf.seek(0, 0)
+    bot.send_document(chat_id=chat_id,
+                      data=vcf,
+                      caption='Для добавления контакта на Ваше устройство скачайте и откройте этот файл ⬆️')
+    vcf.close()
 
 
 def get_change_person_reply_markup(person: Person):

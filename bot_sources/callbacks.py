@@ -3,7 +3,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bot_sources import bot, logger, get_unauthorized_user_start_message, get_rm_group_keyboard, \
     keyboard_to_chose_users_groups, user_info, get_main_inline_keyboard, get_start_keyboard, main_movement_keyboard, \
     get_edit_equipment_keyboard, get_kurpus_keyboard_for_create_movement, is_person, phone_serach_parameters, \
-    get_person_info, get_contact_reply_markup, get_change_person_reply_markup, get_classes_table
+    get_person_info, get_contact_reply_markup, get_change_person_reply_markup, get_classes_table, send_contact_info
 from models import User, Links, Group, Equipment, Person
 
 
@@ -499,19 +499,7 @@ def klassruk_phone_search_show(call):
     if persons.count() > 0:
         for person in persons:
             if f'Классный руководитель {class_name}' in str(person.position).split(','):
-                if not person.photo == '':
-                    bot.send_photo(chat_id=call.message.chat.id,
-                                   photo=person.photo,
-                                   caption=get_person_info(person),
-                                   reply_markup=get_contact_reply_markup(user, person))
-                else:
-                    bot.send_message(chat_id=call.message.chat.id,
-                                     text=get_person_info(person),
-                                     reply_markup=get_contact_reply_markup(user, person))
-                bot.send_contact(chat_id=call.message.chat.id,
-                                 phone_number=person.phone,
-                                 first_name=person.surname,
-                                 last_name=f"{person.name} {person.patronymic}")
+                send_contact_info(chat_id=call.message.chat.id, person=person, user=user)
                 found_person = True
                 break
     if not found_person:
