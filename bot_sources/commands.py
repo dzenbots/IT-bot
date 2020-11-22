@@ -160,7 +160,7 @@ def google_update(message: Message):
         return
     cur_persons_count = Person.select().count()
     gs_phones = GoogleSync(spreadsheet_id=PHONE_SPREADSHEET_ID)
-    persons_from_google = gs_phones.read_range(list_name='List1',
+    persons_from_google = gs_phones.read_range(list_name='База контактов',
                                                range_in_list=f'A{cur_persons_count + 2}:G')
     if persons_from_google is not None:
         for person in persons_from_google:
