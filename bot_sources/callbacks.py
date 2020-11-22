@@ -2,7 +2,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot_sources import bot, logger, get_unauthorized_user_start_message, get_rm_group_keyboard, \
     keyboard_to_chose_users_groups, user_info, get_main_inline_keyboard, get_start_keyboard, main_movement_keyboard, \
-    get_edit_equipment_keyboard, get_kurpus_keyboard_for_create_movement, is_person, phone_serach_parameters, \
+    get_edit_equipment_keyboard, get_kurpus_keyboard_for_create_movement, is_person, phone_search_parameters, \
     get_person_info, get_contact_reply_markup, get_change_person_reply_markup, get_classes_table, send_contact_info
 from models import User, Links, Group, Equipment, Person
 
@@ -399,7 +399,7 @@ def start_phone_search(call):
     bot.edit_message_text(chat_id=call.message.chat.id,
                           message_id=call.message.message_id,
                           text='Выберите параметр поиска',
-                          reply_markup=phone_serach_parameters)
+                          reply_markup=phone_search_parameters)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'Surname_phone_search')

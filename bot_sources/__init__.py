@@ -200,11 +200,11 @@ def get_kurpus_keyboard_for_create_movement(equipment: Equipment):
     return ret_keyboard
 
 
-phone_serach_parameters = InlineKeyboardMarkup()
-phone_serach_parameters.add(InlineKeyboardButton(text='Фамилия', callback_data='Surname_phone_search'))
-phone_serach_parameters.add(InlineKeyboardButton(text='Имя Отчество', callback_data='Name_phone_search'))
-phone_serach_parameters.add(InlineKeyboardButton(text='Телефон', callback_data='Number_phone_search'))
-phone_serach_parameters.add(InlineKeyboardButton(text='Классный руководитель', callback_data='KlassRuk_phone_search'))
+phone_search_parameters = InlineKeyboardMarkup()
+phone_search_parameters.add(InlineKeyboardButton(text='Фамилия', callback_data='Surname_phone_search'))
+phone_search_parameters.add(InlineKeyboardButton(text='Имя Отчество', callback_data='Name_phone_search'))
+phone_search_parameters.add(InlineKeyboardButton(text='Телефон', callback_data='Number_phone_search'))
+phone_search_parameters.add(InlineKeyboardButton(text='Классный руководитель', callback_data='KlassRuk_phone_search'))
 
 
 def get_classes_table():
@@ -290,15 +290,15 @@ E-mail: {person.email}"""
 
 
 def get_contact_reply_markup(user: User, person: Person):
-    reply_murkup = None
+    reply_markup = None
     if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
-        reply_murkup = InlineKeyboardMarkup()
-        reply_murkup.row(InlineKeyboardButton(text='Изменить',
+        reply_markup = InlineKeyboardMarkup()
+        reply_markup.row(InlineKeyboardButton(text='Изменить',
                                               callback_data=f"Change-person_{person.id}"),
                          InlineKeyboardButton(text='Видимый ✅' if person.actual == 'True' else 'Невидимый ❌',
                                               callback_data=f"ChActual_{person.id}"))
 
-    return reply_murkup
+    return reply_markup
 
 
 def send_contact_info(chat_id, person: Person, user: User):
@@ -334,22 +334,22 @@ def send_contact_info(chat_id, person: Person, user: User):
 
 
 def get_change_person_reply_markup(person: Person):
-    reply_murkup = InlineKeyboardMarkup(row_width=1)
-    reply_murkup.add(InlineKeyboardButton(text='Фамилия',
+    reply_markup = InlineKeyboardMarkup(row_width=1)
+    reply_markup.add(InlineKeyboardButton(text='Фамилия',
                                           callback_data=f'Edit_person-surname_{person.id}'))
-    reply_murkup.add(InlineKeyboardButton(text='Имя',
+    reply_markup.add(InlineKeyboardButton(text='Имя',
                                           callback_data=f'Edit_person-name_{person.id}'))
-    reply_murkup.add(InlineKeyboardButton(text='Отчество',
+    reply_markup.add(InlineKeyboardButton(text='Отчество',
                                           callback_data=f'Edit_person-patronymic_{person.id}'))
-    reply_murkup.add(InlineKeyboardButton(text='Телефон',
+    reply_markup.add(InlineKeyboardButton(text='Телефон',
                                           callback_data=f'Edit_person-phone_{person.id}'))
-    reply_murkup.add(InlineKeyboardButton(text='Фото',
+    reply_markup.add(InlineKeyboardButton(text='Фото',
                                           callback_data=f'Edit_person-photo_{person.id}'))
-    reply_murkup.add(InlineKeyboardButton(text='Должность',
+    reply_markup.add(InlineKeyboardButton(text='Должность',
                                           callback_data=f'Edit_person-position_{person.id}'))
-    reply_murkup.add(InlineKeyboardButton(text='e-mail',
+    reply_markup.add(InlineKeyboardButton(text='e-mail',
                                           callback_data=f'Edit_person-email_{person.id}'))
-    return reply_murkup
+    return reply_markup
 
 
 def update_person_info_in_google(person: Person):
