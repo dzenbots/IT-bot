@@ -279,6 +279,14 @@ def get_classes_table():
                      InlineKeyboardButton(text='9Л', callback_data='класс_9Л'),
                      InlineKeyboardButton(text='9М', callback_data='класс_9М')
                      )
+    ret_keyboard.row(InlineKeyboardButton(text='10И', callback_data='класс_10И'),
+                     InlineKeyboardButton(text='10К', callback_data='класс_10К'),
+                     InlineKeyboardButton(text='10М', callback_data='класс_10М')
+                     )
+    ret_keyboard.row(InlineKeyboardButton(text='11И', callback_data='класс_11И'),
+                     InlineKeyboardButton(text='11К', callback_data='класс_11К'),
+                     InlineKeyboardButton(text='11М', callback_data='класс_11М')
+                     )
     return ret_keyboard
 
 

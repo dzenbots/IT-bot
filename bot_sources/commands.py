@@ -167,14 +167,14 @@ def google_update(message: Message):
             if len(person) < 7:
                 for j in range(len(person), 7):
                     person.append('')
-            Person.get_or_create(name=person[1],
-                                 surname=person[0],
-                                 patronymic=person[2],
+            Person.get_or_create(name=person[1].strip(),
+                                 surname=person[0].strip(),
+                                 patronymic=person[2].strip(),
                                  defaults={
-                                     'position': person[3],
-                                     'photo': person[4],
-                                     'phone': f'+{person[5]}',
-                                     'email': person[6],
+                                     'position': person[3].strip(),
+                                     'photo': person[4].strip(),
+                                     'phone': f'+{person[5].strip()}',
+                                     'email': person[6].strip(),
                                      'actual': 'True'
                                  })
     bot.send_message(chat_id=user.telegram_id,
