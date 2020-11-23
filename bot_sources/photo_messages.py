@@ -14,7 +14,7 @@ def receive_photo(message: Message):
         if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Unauthorized'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=message.chat.id)
         return
     if user.status.split(':')[0] == 'Edit_person_info':
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):

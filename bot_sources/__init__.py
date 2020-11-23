@@ -21,9 +21,9 @@ def is_person(chat):
     return False
 
 
-def get_unauthorized_user_start_message():
+def get_unauthorized_user_start_message(user: User):
     return f"""Вы не авторизованный пользователь!
-Дождитесь пока администратор разрешит Вам использование данного бота!"""
+Сообщите системному администратору код {user.telegram_id} для получения доступа к функциям бота"""
 
 
 def user_info(user: User):

@@ -16,7 +16,7 @@ def show_group_list(call):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=call.message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=call.message.chat.id)
         return
     groups = Group.select()
     return_str = 'Список групп:\n'
@@ -34,7 +34,7 @@ def add_group(call):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=call.message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=call.message.chat.id)
         return
     User.update(status='Adding group').where(User.id == user.id).execute()
     bot.edit_message_text(text='Введите название новой группы пользователей',
@@ -51,7 +51,7 @@ def show_groups_for_remove(call):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=call.message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=call.message.chat.id)
         return
     User.update(status=f'rm_group').where(User.id == user.id).execute()
     bot.edit_message_text(text='Выберите группу для удаления',
@@ -69,7 +69,7 @@ def remove_group(call):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=call.message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=call.message.chat.id)
         return
 
     links = Links.select(Links).join(Group).where(Group.id == int(call.data.split('_')[1]))
@@ -95,7 +95,7 @@ def add_user_to_group(call):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=call.message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=call.message.chat.id)
         return
     temp_user = User.get(User.id == int(call.data.split('_')[1]))
     temp_user_groups = Group.select(Group).join(Links).where(Links.user == temp_user.id)
@@ -122,7 +122,7 @@ def group(call):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=call.message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=call.message.chat.id)
         return
     group_to_add_to = Group.get(id=int(call.data.split('_')[1]))
     user_to_be_entered_to_group = User.get(id=int(call.data.split('_')[2]))
@@ -156,7 +156,7 @@ def rm_user_from_group(call):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=call.message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=call.message.chat.id)
         return
     temp_user = User.get(User.id == int(call.data.split('_')[1]))
     temp_user_groups = Group.select(Group).join(Links).where(Links.user == temp_user.id)
@@ -183,7 +183,7 @@ def group(call):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=call.message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=call.message.chat.id)
         return
     group_to_remove_from = Group.get(id=int(call.data.split('_')[1]))
     user_to_be_removed_from_group = User.get(id=int(call.data.split('_')[2]))

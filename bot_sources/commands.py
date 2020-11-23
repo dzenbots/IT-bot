@@ -24,7 +24,7 @@ def get_start(message: Message):
         unauth_group, created = Group.get_or_create(group_name='Unauthorized')
         Links.create(user=user, group=unauth_group)
 
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=message.chat.id)
         for admin in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             bot.send_message(text=get_new_unauthorized_user_message(user),
                              chat_id=admin.telegram_id,
@@ -61,7 +61,7 @@ def groups_functions(message: Message):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=message.chat.id)
         return
     bot.send_message(text='Выберите действие', chat_id=message.chat.id, reply_markup=groups_keyboard)
 
@@ -75,7 +75,7 @@ def show_all_users(message: Message):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=message.chat.id)
         return
     for user in User.select():
         bot.send_message(text=user_info(user),
@@ -92,7 +92,7 @@ def google_update(message: Message):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'Admins'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=message.chat.id)
         return
     cur_equipments = Equipment.select()
     cur_movement = Movement.select()
@@ -156,7 +156,7 @@ def google_update(message: Message):
         if user not in User.select(User).join(Links).join(Group).where(Group.group_name == 'PhonesAdmin'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=message.chat.id)
         return
     cur_persons_count = Person.select().count()
     gs_phones = GoogleSync(spreadsheet_id=PHONE_SPREADSHEET_ID)

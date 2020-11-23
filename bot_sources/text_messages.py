@@ -15,7 +15,7 @@ def go_main(message: Message):
         if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Unauthorized'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=message.chat.id)
         return
     bot.send_message(text="Список доступных Вам функций:", chat_id=message.chat.id,
                      reply_markup=get_main_inline_keyboard(user))
@@ -30,7 +30,7 @@ def plain_text(message: Message):
         if user in User.select(User).join(Links).join(Group).where(Group.group_name == 'Unauthorized'):
             raise Exception("Unauthorized user")
     except Exception:
-        bot.send_message(text=get_unauthorized_user_start_message(), chat_id=message.chat.id)
+        bot.send_message(text=get_unauthorized_user_start_message(user=user), chat_id=message.chat.id)
         return
 
     if user.status == 'Adding group':
